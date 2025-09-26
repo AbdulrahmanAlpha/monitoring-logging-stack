@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: monitoring
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+
+    alerting:
+      alertmanagers:
+      - static_configs:
+        - targets: ['alertmanager.monitoring.svc.cluster.local:9093']
+
+    scrape_configs:
+    - job_name: 'prometheus'
+      static_configs:
+      - targets: ['localhost:9090']
+
+    - job_name: 'kube-state-metrics'
+      static_configs:
+      - targets: ['kube-state-metrics.monitoring.svc.cluster.local:8080']
+
+    - job_name: 'node-exporter'
+      static_configs:
+      - targets: ['node-exporter.monitoring.svc.cluster.local:9100']
+
+  prometheus.rules.yml: |
+    groups:
+    - name: node.rules
+      rules:
+      - alert: HighNodeLoad
+        expr: node_load1 > 0.85 * machine_cpu_cores
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High node load ({{ $labels.instance }})"
+          description: "Load 1m > 85% of cores for 5m."
+
+      - alert: LowNodeMemory
+        expr: (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) < 0.15
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Low node memory ({{ $labels.instance }})"
+          description: "Available memory < 15%."
+
+    - name: pod.rules
+      rules:
+      - alert: PodRestartSpike
+        expr: increase(kube_pod_container_status_restarts_total[5m]) > 3
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Pod restart spike detected"
+          description: "A pod has restarted more than 3 times in the last 5 minutes."

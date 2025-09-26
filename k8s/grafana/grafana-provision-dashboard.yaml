@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  simple-dashboard.json: |
+    {
+      "id": null,
+      "uid": null,
+      "title": "Cluster Overview (Simple)",
+      "panels": [
+        {
+          "type": "graph",
+          "title": "Node Load (1m)",
+          "targets": [
+            {
+              "expr": "node_load1",
+              "format": "time_series"
+            }
+          ],
+          "gridPos": {"x":0,"y":0,"w":12,"h":6}
+        },
+        {
+          "type": "graph",
+          "title": "Node Memory Available % (per node)",
+          "targets": [
+            {
+              "expr": "100 * (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)",
+              "format": "time_series"
+            }
+          ],
+          "gridPos": {"x":12,"y":0,"w":12,"h":6}
+        },
+        {
+          "type": "table",
+          "title": "Pod Restarts (last 1h)",
+          "targets": [
+            {
+              "expr": "increase(kube_pod_container_status_restarts_total[1h])",
+              "format": "table"
+            }
+          ],
+          "gridPos": {"x":0,"y":6,"w":24,"h":6}
+        }
+      ],
+      "schemaVersion": 36,
+      "version": 1
+    }
+
