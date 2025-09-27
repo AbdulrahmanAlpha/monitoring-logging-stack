@@ -25,7 +25,8 @@ The goal was to enable **proactive issue detection, real-time dashboards, and ce
 ---
 
 ## 🏗️ Architecture
-![Architecture Diagram](docs/Architecture_Diagram.png) <!-- Replace with your diagram -->
+
+![](docs/Artichture%20Diagram.png)
 
 **Key components:**
 1. **Prometheus**  
